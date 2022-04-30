@@ -10,7 +10,7 @@ class Board:
         self.width = 7
         self.height = 6
         gameArea = []
-        self.BLUE = (0, 0, 225)
+        self.BLUE = (30, 144, 255)
         self.BLACK = (0, 0, 0)
         self.RED = (255, 0, 0)
         self.YELLOW = (255, 255, 0)
@@ -185,9 +185,9 @@ class Board:
 
                     if not self.allowsMove(playerChoice):
                         label = errorFont.render("No spaces available in column # " + str(playerChoice + 1), 1, self.RED)
-                        screen.blit(label, (40, 40))
+                        screen.blit(label, (45, 40))
                         pygame.display.update()
-                        pygame.time.wait(3000)
+                        pygame.time.wait(2000)
                     else:
                         self.addMove(playerChoice, currPlayer)
 
@@ -196,9 +196,10 @@ class Board:
 
                             if currPlayer == 'X':
                                 label = winFont.render("Red Wins!!", 1, self.RED)
+                                screen.blit(label, (150, 10))
                             else:
                                 label = winFont.render("Yellow Wins!!", 1, self.YELLOW)
-                            screen.blit(label, (40, 10))
+                                screen.blit(label, (75, 10))
                             pygame.display.update()
                             pygame.time.wait(3000)
                             runGame = False
@@ -219,9 +220,10 @@ size = (width, height)
 RADIUS = int(SQUARE_SIZE/2 - 5)
 screen = pygame.display.set_mode(size)
 errorFont = pygame.font.SysFont("monospace", 30)
-winFont = errorFont = pygame.font.SysFont("monospace", 75)
+winFont = pygame.font.SysFont("monospace", 75)
 
 b.hostGame()
+
 
 
 
