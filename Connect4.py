@@ -1,12 +1,19 @@
 # Name: Michael Scoli
+import sys
+import pygame
+from math import floor
 
 class Board:
-    def __init__(self, width=7, height=6):
+    def __init__(self):
         """Board object constructor that takes in two named arguments for number of rows and
         number of columns, and also initializes a game area represented by a 2-D list"""
-        self.width = width
-        self.height = height
+        self.width = 7
+        self.height = 6
         gameArea = []
+        self.BLUE = (0, 0, 225)
+        self.BLACK = (0, 0, 0)
+        self.RED = (255, 0, 0)
+        self.YELLOW = (255, 255, 0)
         for column in range(self.width):
             gameArea.append([])
             for row in range(self.height):
@@ -51,22 +58,6 @@ class Board:
             if self.gameArea[col][i] == ' ':
                 highestRowNumAvail = i
         self.gameArea[col][highestRowNumAvail] = ox
-
-    def setBoard(self, moveString):
-        """takes in a string of columns and places
-        alternating checkers in those columns, starting with 'X'
-        For example, call b.setBoard('0123456') to see 'X's and 'O's alternate on the bottom row, or b.setBoard('000000') to see them alternate in the left column.
-        moveString must be a string of integers"""
-
-        nextCh = 'X'  # start by playing 'X'
-        for colString in moveString:
-            col = int(colString)
-            if 0 <= col <= self.width:
-                self.addMove(col, nextCh)
-            if nextCh == 'X':
-                nextCh = 'O'
-            else:
-                nextCh = 'X'
 
     def winsFor(self, ox):
         """Returns True if given checker, 'X' or 'O', held in ox, has won the calling
@@ -151,6 +142,19 @@ class Board:
                 currCol += 1
                 currRow += 1
 
+    def drawBoard(self):
+        for col in range(self.width):
+            for row in range(self.height):
+                pygame.draw.rect(screen, self.BLUE,(col * SQUARE_SIZE, row * SQUARE_SIZE + SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                if self.gameArea[col][row] == ' ':
+                    pygame.draw.circle(screen, self.BLACK, (int(col * SQUARE_SIZE + SQUARE_SIZE/2), int(row * SQUARE_SIZE + SQUARE_SIZE + SQUARE_SIZE/2)), RADIUS)
+                elif self.gameArea[col][row] == 'X':
+                    pygame.draw.circle(screen, self.RED, (int(col * SQUARE_SIZE + SQUARE_SIZE / 2), int(row * SQUARE_SIZE + SQUARE_SIZE + SQUARE_SIZE / 2)), RADIUS)
+                else:
+                    pygame.draw.circle(screen, self.YELLOW, (int(col * SQUARE_SIZE + SQUARE_SIZE / 2), int(row * SQUARE_SIZE + SQUARE_SIZE + SQUARE_SIZE / 2)), RADIUS)
+
+                pygame.display.update()
+
     def hostGame(self):
         """Runs loop allowing the user(s) to play a game"""
         runGame = True
@@ -158,29 +162,69 @@ class Board:
         print("Welcome to Connect Four!")
 
         while runGame:
-            print('\n' + self.__str__() + '\n')
+            self.drawBoard()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
 
-            playerChoice = int(input(currPlayer + "'s choice: "))
-
-            if playerChoice not in range(self.width):
-                print("Error: Column #" + str(playerChoice) + " does not exist in this game board")
-            elif not self.allowsMove(playerChoice):
-                print("No spaces available in column # " + str(playerChoice))
-            else:
-                self.addMove(playerChoice, currPlayer)
-
-                if self.winsFor(currPlayer):
-                    print('\n' + currPlayer + " wins -- Congratulations!\n")
-                    print(self)
-                    runGame = False
-                else:
+                if event.type == pygame.MOUSEMOTION:
+                    pygame.draw.rect(screen, self.BLACK, (0, 0, width, SQUARE_SIZE))
                     if currPlayer == 'X':
-                        currPlayer = 'O'
+                        posX = event.pos[0]
+                        pygame.draw.circle(screen, self.RED, (posX, int(SQUARE_SIZE/2)), RADIUS)
                     else:
-                        currPlayer = 'X'
+                        posX = event.pos[0]
+                        pygame.draw.circle(screen, self.YELLOW, (posX, int(SQUARE_SIZE / 2)), RADIUS)
+                    pygame.display.update()
 
-# b = Board()
-# b.hostGame()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pygame.draw.rect(screen, self.BLACK, (0, 0, width, SQUARE_SIZE))
+                    pygame.display.update()
+                    posX = event.pos[0]
+                    playerChoice = int(floor(posX/SQUARE_SIZE))
+
+                    if not self.allowsMove(playerChoice):
+                        label = errorFont.render("No spaces available in column # " + str(playerChoice + 1), 1, self.RED)
+                        screen.blit(label, (40, 40))
+                        pygame.display.update()
+                        pygame.time.wait(3000)
+                    else:
+                        self.addMove(playerChoice, currPlayer)
+
+                        if self.winsFor(currPlayer):
+                            self.drawBoard()
+
+                            if currPlayer == 'X':
+                                label = winFont.render("Red Wins!!", 1, self.RED)
+                            else:
+                                label = winFont.render("Yellow Wins!!", 1, self.YELLOW)
+                            screen.blit(label, (40, 10))
+                            pygame.display.update()
+                            pygame.time.wait(3000)
+                            runGame = False
+                        else:
+                            if currPlayer == 'X':
+                                currPlayer = 'O'
+                            else:
+                                currPlayer = 'X'
+
+
+b = Board()
+
+pygame.init()
+SQUARE_SIZE = 100
+width = b.width * SQUARE_SIZE
+height = (b.height + 1) * SQUARE_SIZE
+size = (width, height)
+RADIUS = int(SQUARE_SIZE/2 - 5)
+screen = pygame.display.set_mode(size)
+errorFont = pygame.font.SysFont("monospace", 30)
+winFont = errorFont = pygame.font.SysFont("monospace", 75)
+
+b.hostGame()
+
+
+
 
 
 
